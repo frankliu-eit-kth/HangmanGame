@@ -41,7 +41,7 @@ public class Constants {
      */
     public static final int MSG_BODY_INDEX = 1;
     
-    public static final int MSG_LENGTH_INDEX = 2;
+   // public static final int MSG_LENGTH_INDEX = 2;
     
     public static final String MSG_BODY_DELIMETER=";";
 }

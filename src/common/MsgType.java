@@ -32,6 +32,5 @@ public enum MsgType {
     DISCONNECT,
     START,
     USER,
-    SERVERMSG,
-    MSGLENGTH
+    SERVERMSG
 }
