@@ -126,9 +126,6 @@ public class ServerConnection {
             int msgLength=entireMsg.length()-msgParts[GlobalConstants.MSG_LENGTH_INDEX].length()-GlobalConstants.MSG_DELIMETER.length();
             if(lengthHeader!=msgLength) {
             	throw new MessageException("Received incomplete message: " + entireMsg);
-            }else {
-            	//for test
-            	System.out.println("received complete message from server");
             }
             if (MsgType.valueOf(msgParts[GlobalConstants.MSG_TYPE_INDEX].toUpperCase()) != MsgType.SERVERMSG) {
                 throw new MessageException("Received corrupt message: " + entireMsg);

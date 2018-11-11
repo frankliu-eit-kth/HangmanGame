@@ -44,6 +44,7 @@ public class GameController {
 	public String changeUserName(String newName) {
 		try {
 			this.game.getPlayer().setName(newName);
+			this.game.updateStateMessage();
 			System.out.println("chang user name to"+newName);
 			return stateMessage("continue");
 			

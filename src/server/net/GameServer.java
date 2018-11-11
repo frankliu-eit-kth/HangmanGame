@@ -60,6 +60,7 @@ public class GameServer {
         }
     }
     
+    
     private void parseArguments(String[] arguments) {
         if (arguments.length > 0) {
             try {

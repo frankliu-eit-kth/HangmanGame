@@ -112,9 +112,9 @@ public class ClientHandler implements Runnable{
             int msgLength=receivedString.length()-msgTokens[GlobalConstants.MSG_LENGTH_INDEX].length()-GlobalConstants.MSG_DELIMETER.length();
             if(lengthHeader!=msgLength) {
             	throw new MessageException("Received incomplete message: " + receivedString);
-            }else {
-            	//for test
-            	System.out.println("received complete message from client");
+            }
+            else {
+            	System.out.println("receive complete message from client");
             }
         }
         private void parse(String strToParse) {

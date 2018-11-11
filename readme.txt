@@ -57,7 +57,7 @@ About:
 				by opening a server socket( default TCP), and constantly listen to new request and pass the client socket to the handler( which will run serving logic)
 			communicate with client:
 				in client handler open the io stream by the client socket and then use read and write functions to communicate
-				and of course by different handlers for different clients there wil be multithreads
+				and of course by different handlers for different clients there will be multithreads
 			run service logic:
 				in handler, use controller to run the service logic
 		
