@@ -45,12 +45,17 @@ public class ServerConnection {
     public void sendStart() {
         sendMsg(MsgType.START.toString());
     }
+    // not very robust: length header position may change
     private void sendMsg(String... parts) {
-        StringJoiner joiner = new StringJoiner(Constants.MSG_DELIMETER);
+        StringJoiner msgJoiner = new StringJoiner(Constants.MSG_DELIMETER);
         for (String part : parts) {
-            joiner.add(part);
+            msgJoiner.add(part);
         }
-        toServer.println(joiner.toString());
+        String msg=msgJoiner.toString();
+        StringJoiner streamMsgJoiner=new StringJoiner(Constants.MSG_DELIMETER);
+        streamMsgJoiner.add(new String(""+msg.length()));
+        streamMsgJoiner.add(msg);
+        toServer.println(streamMsgJoiner.toString());
     }
     public void sendInput(String input) {
     	sendMsg(MsgType.USER_INPUT.toString(), input);
@@ -66,6 +71,9 @@ public class ServerConnection {
         public void run() {
             try {
                 for (;;) {
+                	//for test
+                	//System.out.println(fromServer.readLine());
+                	
                     outputHandler.handleMsg(extractMsgBody(fromServer.readLine()));
                 }
             } catch (Throwable connectionFailure) {
@@ -77,6 +85,14 @@ public class ServerConnection {
 
         private String extractMsgBody(String entireMsg) {
             String[] msgParts = entireMsg.split(Constants.MSG_DELIMETER);
+            int lengthHeader=Integer.parseInt(msgParts[Constants.MSG_LENGTH_INDEX]);
+            int msgLength=entireMsg.length()-msgParts[Constants.MSG_LENGTH_INDEX].length()-Constants.MSG_DELIMETER.length();
+            if(lengthHeader!=msgLength) {
+            	throw new MessageException("Received incomplete message: " + entireMsg);
+            }else {
+            	//for test
+            	System.out.println("received complete message from server");
+            }
             if (MsgType.valueOf(msgParts[Constants.MSG_TYPE_INDEX].toUpperCase()) != MsgType.SERVERMSG) {
                 throw new MessageException("Received corrupt message: " + entireMsg);
             }

@@ -32,16 +32,17 @@ public class Constants {
      * Separates a message type specifier from the message body.
      */
     public static final String MSG_DELIMETER = "##";
-    /**
-     * The message type specifier is the first token in a message.
-     */
-    public static final int MSG_TYPE_INDEX = 0;
+    
+    public static final int MSG_LENGTH_INDEX = 0;
+    
+    
+    public static final int MSG_TYPE_INDEX = 1;
     /**
      * The message body is the second token in a message.
      */
-    public static final int MSG_BODY_INDEX = 1;
+    public static final int MSG_BODY_INDEX = 2;
     
-   // public static final int MSG_LENGTH_INDEX = 2;
+    
     
     public static final String MSG_BODY_DELIMETER=";";
 }

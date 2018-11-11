@@ -27,6 +27,19 @@ class Test
 		// Serialization 
 		try
 		{ 
+			ByteArrayOutputStream byteOutStream=new ByteArrayOutputStream();
+			ObjectOutputStream objOutStream=new ObjectOutputStream(byteOutStream);
+			objOutStream.writeObject(object);
+			objOutStream.flush();
+			objOutStream.close();
+			int length=byteOutStream.toByteArray().length;
+			System.out.println(length);
+			//byteOutStream.flush();
+			
+			OutputStream f2 = new FileOutputStream("test.txt");
+			byteOutStream.writeTo(f2);
+			//int length = objOutStream.;
+			/*
 			//Saving of object in a file 
 			FileOutputStream file = new FileOutputStream(filename); 
 			ObjectOutputStream out = new ObjectOutputStream(file); 
@@ -37,7 +50,7 @@ class Test
 			out.close(); 
 			file.close(); 
 			
-			System.out.println("Object has been serialized"); 
+			System.out.println("Object has been serialized"); */
 
 		} 
 		

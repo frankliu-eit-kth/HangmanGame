@@ -69,7 +69,12 @@ public class ClientHandler implements Runnable{
         StringJoiner joiner = new StringJoiner(Constants.MSG_DELIMETER);
         joiner.add(MsgType.SERVERMSG.toString());
         joiner.add(msg);
-        toClient.println(joiner.toString());
+        String fullMessage=joiner.toString();
+        int fullMessageLength=fullMessage.length();
+        StringJoiner headerJoiner = new StringJoiner(Constants.MSG_DELIMETER);
+        headerJoiner.add(new String(""+fullMessageLength));
+        headerJoiner.add(fullMessage);
+        toClient.println(headerJoiner.toString());
     }
 
     
@@ -91,10 +96,22 @@ public class ClientHandler implements Runnable{
         private String receivedString;
 
         private Message(String receivedString) {
+        	checkComplete(receivedString);
             parse(receivedString);
             this.receivedString = receivedString;
         }
-
+        
+        private void checkComplete(String receivedString) {
+        	String[] msgTokens = receivedString.split(Constants.MSG_DELIMETER);
+            int lengthHeader=Integer.parseInt(msgTokens[Constants.MSG_LENGTH_INDEX]);
+            int msgLength=receivedString.length()-msgTokens[Constants.MSG_LENGTH_INDEX].length()-Constants.MSG_DELIMETER.length();
+            if(lengthHeader!=msgLength) {
+            	throw new MessageException("Received incomplete message: " + receivedString);
+            }else {
+            	//for test
+            	System.out.println("received complete message from client");
+            }
+        }
         private void parse(String strToParse) {
             try {
                 String[] msgTokens = strToParse.split(Constants.MSG_DELIMETER);
@@ -108,7 +125,7 @@ public class ClientHandler implements Runnable{
         }
         
         private boolean hasBody(String[] msgTokens) {
-            return msgTokens.length > 1;
+            return msgTokens.length > 2;
         }
     }
     
