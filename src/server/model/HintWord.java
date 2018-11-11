@@ -1,5 +1,7 @@
 package server.model;
-
+/*
+ * @role: a beam model to represent the hint word
+ */
 public class HintWord {
 	
 	private char[] letters;
@@ -17,8 +19,6 @@ public class HintWord {
 		this.letters=letters;
 		this.numLetters=letters.length;
 	}
-	
-	
 	
 	public char[] getLetters() {
 		return letters;

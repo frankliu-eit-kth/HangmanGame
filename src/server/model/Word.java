@@ -1,7 +1,9 @@
 package server.model;
 
 import java.util.Arrays;
-
+/*
+ * @role: a beam to represend a word
+ */
 public class Word {
 	private String word;
 	private char[] letters;

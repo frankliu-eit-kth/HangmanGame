@@ -1,18 +1,30 @@
 package client.view;
 
+/*
+ * @role: a Java bean for manipulating the current game status, used to display the current user status on console
+ * 
+ */
+
 public class GameStatus {
+	/*
+	 * @role: used to extract fields from the message
+	 */
 	private static final int INDEX_GAME_STATE=0;
 	private static final int INDEX_PLAYER_NAME=1;
 	private static final int INDEX_SCORE=2;
 	private static final int INDEX_ATTEMPTS=3;
 	private static final int INDEX_HINTWORD=4;
-	
+	/*
+	 * @role: fields
+	 */
 	private String playerName;
 	private String currentGameState;
 	private int score;
 	private int attempts;
 	private String hintWord;
-	
+	/*
+	 * @role: constructor: parse the message into game status
+	 */
 	public GameStatus(String parseMessage){
 		String[] fields=parseMessage.split(";");
 		this.playerName=fields[INDEX_PLAYER_NAME];
@@ -22,8 +34,9 @@ public class GameStatus {
 		this.hintWord=fields[INDEX_HINTWORD];
 		
 	}
-	
-	
+	/*
+	 * @role: getters and setters
+	 */
 	public String getPlayerName() {
 		return playerName;
 	}

@@ -1,5 +1,8 @@
 package server.model;
-
+/*
+ * @role: a beam to represent a player
+ * 
+ */
 public class Player {
 	private String ip;
 	private int score;

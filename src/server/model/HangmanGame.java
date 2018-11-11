@@ -7,8 +7,21 @@ import java.util.ArrayList;
 import java.util.StringJoiner;
 import java.util.concurrent.ThreadLocalRandom;
 
-import common.Constants;
-
+import common.GlobalConstants;
+/*
+ * @role: model for executing the hangman game logic
+ * @methods provide for the upper level controller
+ * 		HangmanGame(): constructor
+ * 		getters and setters
+ * 		updateStateMessage()
+ * 		initWord(): read a new word and update the game state
+ * 		oneRound(): execute one round and return the current game state
+ * @ notice:
+ * 		game state is the state of win/lost/continue
+ * 		game status:states of the whole game
+ * 		could be confusing
+ * 		
+ */
 public class HangmanGame {
 	private Player player;
 	private HintWord hintWord;
@@ -20,21 +33,6 @@ public class HangmanGame {
 		this.player=player;
 	}
 	
-	
-	public void updateStateMessage() {
-		StringJoiner sj=new StringJoiner(Constants.MSG_BODY_DELIMETER);
-		sj.add(this.getPlayer().getName());
-		sj.add(new String(""+this.getPlayer().getScore()));
-		sj.add(new String(""+this.getAttempts()));
-		sj.add(new String(this.getHintWord().toStringWord()));
-		this.stateMessage=sj.toString();
-	}
-	public String getStateMessage() {
-		return stateMessage;
-	}
-	public void setStateMessage(String stateMessage) {
-		this.stateMessage = stateMessage;
-	}
 	public void initWord() {
 		String randomWord=this.readRandomWord();
 		this.word=new Word(randomWord);		
@@ -44,46 +42,16 @@ public class HangmanGame {
 		updateStateMessage();
 	}
 	
-	private String readRandomWord() {
-		String wordFile="words.txt";
-		ArrayList<String> wordList=new ArrayList<String>();
-		
-        try {
-            try (BufferedReader br = new BufferedReader(new FileReader(wordFile))) {
-                String s;
-                while ((s = br.readLine()) != null) {
-                    wordList.add(s);
-                }
-            }
-            int randomNum = ThreadLocalRandom.current().nextInt(0, wordList.size());
-            return wordList.get(randomNum);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }	
-	}
-	
-	
-	
-	private boolean checkLetter(char input) {
-		boolean flag=false;
-		char[] wordLetters=word.getWord().toCharArray();
-		for(int i=0;i<word.getNumLetters();i++) {
-			if(input==wordLetters[i]) {
-				hintWord.getLetters()[i]=input;
-				flag=true;
-			}
-		}
-		return flag;
-	}
-	
-	private boolean checkWholeWord(String input) {
-		return input.equals(word.getWord());
+	public void updateStateMessage() {
+		StringJoiner sj=new StringJoiner(GlobalConstants.MSG_BODY_DELIMETER);
+		sj.add(this.getPlayer().getName());
+		sj.add(new String(""+this.getPlayer().getScore()));
+		sj.add(new String(""+this.getAttempts()));
+		sj.add(new String(this.getHintWord().toStringWord()));
+		this.stateMessage=sj.toString();
 	}
 	
 	public int oneRound(String input) {
-		int flag;
-		
 		if(input.length()>1) {
 			if(checkWholeWord(input)) {
 				hintWord.setLetters(input);
@@ -121,15 +89,48 @@ public class HangmanGame {
 		}
 	}
 	
+	private String readRandomWord() {
+		String wordFile="words.txt";
+		ArrayList<String> wordList=new ArrayList<String>();
+		
+        try {
+            try (BufferedReader br = new BufferedReader(new FileReader(wordFile))) {
+                String s;
+                while ((s = br.readLine()) != null) {
+                    wordList.add(s);
+                }
+            }
+            int randomNum = ThreadLocalRandom.current().nextInt(0, wordList.size());
+            return wordList.get(randomNum);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }	
+	}
+
+	
+	private boolean checkLetter(char input) {
+		boolean flag=false;
+		char[] wordLetters=word.getWord().toCharArray();
+		for(int i=0;i<word.getNumLetters();i++) {
+			if(input==wordLetters[i]) {
+				hintWord.getLetters()[i]=input;
+				flag=true;
+			}
+		}
+		return flag;
+	}
+	
+	private boolean checkWholeWord(String input) {
+		return input.equals(word.getWord());
+	}
 	
 	private void lose() {
-		//System.out.println("You lose");
 		player.minusScore();
 		updateStateMessage();
 		initWord();
 	}
 	private void win(){
-		//System.out.println("You win");
 		player.addScore();
 		updateStateMessage();
 		initWord();
@@ -167,7 +168,12 @@ public class HangmanGame {
 		this.attempts = attempts;
 	}
 	
-	
+	public String getStateMessage() {
+		return stateMessage;
+	}
+	public void setStateMessage(String stateMessage) {
+		this.stateMessage = stateMessage;
+	}
 	
 	
 }

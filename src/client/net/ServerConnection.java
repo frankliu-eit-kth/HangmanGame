@@ -8,18 +8,41 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.StringJoiner;
 
-import common.Constants;
+import common.GlobalConstants;
 import common.MessageException;
 import common.MsgType;
 
+/*
+ * @role: provides network operations for the upper level
+ * 
+ * @methods provide to the view:
+ * 	connect(): connect to the server and if succeed create a new listener to listen the message
+ * 	disconnect(): send a DISCONNECT message to server and then close the socket, the listener thread will naturally die
+ * 	sendUsername()
+ * 	sendStart()
+ * 	sendInput() 
+ */
 public class ServerConnection {
+	/*
+	 * @role: timeout params
+	 */
 	private static final int TIMEOUT_HALF_HOUR = 1800000;
     private static final int TIMEOUT_HALF_MINUTE = 30000;
+    /*
+     * @role:the socket used for connection
+     */
     private Socket socket;
+    /*
+     * @role: io streams for communication with the server
+     * @futhermore: hereby use the PrintWriter and BufferedReader to read text, and there are a lot kinds of other streams could be chosen from
+     */
     private PrintWriter toServer;
     private BufferedReader fromServer;
+    /*
+     * @role: flag used to maintain the life of a thread
+     */
     private volatile boolean connected;
-    
+  
     public void connect(String host, int port, OutputHandler broadcastHandler) throws
     IOException {
     	 socket = new Socket();
@@ -38,6 +61,7 @@ public class ServerConnection {
         socket = null;
         connected = false;
     }
+    
     public void sendUsername(String username) {
         sendMsg(MsgType.USER.toString(), username);
     }
@@ -45,21 +69,37 @@ public class ServerConnection {
     public void sendStart() {
         sendMsg(MsgType.START.toString());
     }
-    // not very robust: length header position may change
+    
+    public void sendInput(String input) {
+    	sendMsg(MsgType.USER_INPUT.toString(), input);
+    }
+    
+    
+    /*	
+     * @steps: first join the parts to a String-> calculate the length-> join the length header and the original message to a new string-> send 
+     * @warning: not very robust: length header position may change
+     */
     private void sendMsg(String... parts) {
-        StringJoiner msgJoiner = new StringJoiner(Constants.MSG_DELIMETER);
+        StringJoiner msgJoiner = new StringJoiner(GlobalConstants.MSG_DELIMETER);
         for (String part : parts) {
             msgJoiner.add(part);
         }
         String msg=msgJoiner.toString();
-        StringJoiner streamMsgJoiner=new StringJoiner(Constants.MSG_DELIMETER);
+        StringJoiner streamMsgJoiner=new StringJoiner(GlobalConstants.MSG_DELIMETER);
         streamMsgJoiner.add(new String(""+msg.length()));
         streamMsgJoiner.add(msg);
         toServer.println(streamMsgJoiner.toString());
     }
-    public void sendInput(String input) {
-    	sendMsg(MsgType.USER_INPUT.toString(), input);
-    }
+    
+    /*
+     * @role: a thread used to listen to the SERVERMSG messages
+     * @functions:
+     * 		1.read message from server
+     * 		2.check the completeness of message by checking the length header
+     * 		3.extract message body
+     * 		4.pass the message body to output handler (which will pass the message to the view for further handle)
+     * @life: will die when the socket closes
+     */
     private class Listener implements Runnable {
         private final OutputHandler outputHandler;
 
@@ -71,9 +111,6 @@ public class ServerConnection {
         public void run() {
             try {
                 for (;;) {
-                	//for test
-                	//System.out.println(fromServer.readLine());
-                	
                     outputHandler.handleMsg(extractMsgBody(fromServer.readLine()));
                 }
             } catch (Throwable connectionFailure) {
@@ -84,19 +121,19 @@ public class ServerConnection {
         }
 
         private String extractMsgBody(String entireMsg) {
-            String[] msgParts = entireMsg.split(Constants.MSG_DELIMETER);
-            int lengthHeader=Integer.parseInt(msgParts[Constants.MSG_LENGTH_INDEX]);
-            int msgLength=entireMsg.length()-msgParts[Constants.MSG_LENGTH_INDEX].length()-Constants.MSG_DELIMETER.length();
+            String[] msgParts = entireMsg.split(GlobalConstants.MSG_DELIMETER);
+            int lengthHeader=Integer.parseInt(msgParts[GlobalConstants.MSG_LENGTH_INDEX]);
+            int msgLength=entireMsg.length()-msgParts[GlobalConstants.MSG_LENGTH_INDEX].length()-GlobalConstants.MSG_DELIMETER.length();
             if(lengthHeader!=msgLength) {
             	throw new MessageException("Received incomplete message: " + entireMsg);
             }else {
             	//for test
             	System.out.println("received complete message from server");
             }
-            if (MsgType.valueOf(msgParts[Constants.MSG_TYPE_INDEX].toUpperCase()) != MsgType.SERVERMSG) {
+            if (MsgType.valueOf(msgParts[GlobalConstants.MSG_TYPE_INDEX].toUpperCase()) != MsgType.SERVERMSG) {
                 throw new MessageException("Received corrupt message: " + entireMsg);
             }
-            return msgParts[Constants.MSG_BODY_INDEX];
+            return msgParts[GlobalConstants.MSG_BODY_INDEX];
         }
     }
 }

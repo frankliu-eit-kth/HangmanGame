@@ -1,32 +1,9 @@
-/*
- * The MIT License
- *
- * Copyright 2017 Leif Lindbäck <leifl@kth.se>.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package client.view;
 
 import java.util.Scanner;
 import java.util.StringJoiner;
 
-import client.controller.Controller;
+import client.controller.NetworkController;
 import client.net.OutputHandler;
 
 /**
@@ -34,12 +11,13 @@ import client.net.OutputHandler;
  * is started by calling the <code>start</code> method. Commands are executed in a thread pool, a
  * new prompt will be displayed as soon as a command is submitted to the pool, without waiting for
  * command execution to complete.
+ * 
  */
 public class NonBlockingInterpreter implements Runnable {
     private static final String PROMPT = "> ";
     private final Scanner console = new Scanner(System.in);
     private boolean receivingCmds = false;
-    private Controller contr;
+    private NetworkController contr;
     private final ThreadSafeStdOut outMgr = new ThreadSafeStdOut();
 
     /**
@@ -51,7 +29,7 @@ public class NonBlockingInterpreter implements Runnable {
             return;
         }
         receivingCmds = true;
-        contr = new Controller();
+        contr = new NetworkController();
         new Thread(this).start();
     }
 
@@ -62,7 +40,7 @@ public class NonBlockingInterpreter implements Runnable {
     public void run() {
         while (receivingCmds) {
             try {
-                CmdLine cmdLine = new CmdLine(readNextLine());
+                CmdLineHandler cmdLine = new CmdLineHandler(readNextLine());
                 switch (cmdLine.getCmd()) {
                     case QUIT:
                         receivingCmds = false;
@@ -92,7 +70,13 @@ public class NonBlockingInterpreter implements Runnable {
         outMgr.print(PROMPT);
         return console.nextLine();
     }
-    
+    /*
+     * @role: the main logic for UI
+     * @UI logic: 
+     * 		firstly check the game state( win, lose, continue), different system notice for different state
+     * 		then print all the details of the game status
+     * 		all the print are thread safe by using the thread safe standard output
+     */
     private class ConsoleOutput implements OutputHandler {
         @Override
         public void handleMsg(String msg) {
@@ -101,8 +85,6 @@ public class NonBlockingInterpreter implements Runnable {
         		return;
         	}
         	GameStatus gameStatus=new GameStatus(msg);
-        	//for test
-        	System.out.println(gameStatus.toString());
         	if(gameStatus.getCurrentGameState().equals("win")) {
         		outMgr.println("Congratulations! You won this game!");
         	}else {
@@ -113,7 +95,6 @@ public class NonBlockingInterpreter implements Runnable {
         			outMgr.println("Please continue!");
         		}
         	}
-        	
         	outMgr.println("Dear "+gameStatus.getPlayerName());
         	outMgr.println("Your current score is:"+gameStatus.getScore());
         	outMgr.println("Your left attempts:"+gameStatus.getAttempts());

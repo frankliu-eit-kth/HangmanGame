@@ -44,5 +44,8 @@ public enum Command {
      * No command was specified. This means the entire command line is interpreted as user input
      */
     NO_COMMAND,
+    /*
+     * Start a new game
+     */
     START
 }

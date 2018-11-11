@@ -8,18 +8,22 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.util.StringJoiner;
 
-import common.Constants;
+import common.GlobalConstants;
 import common.MessageException;
 import common.MsgType;
 import server.controller.GameController;
-
+/*
+ * @role: a thread tohandle the message communication with a single client && maintains the game controller for this specific game
+ *  
+ */
 public class ClientHandler implements Runnable{
+	
 	private final GameServer server;
     private final Socket clientSocket;
+    private GameController gameController;
     private BufferedReader fromClient;
     private PrintWriter toClient;
     private boolean connected;
-    private GameController gameController;
     
     ClientHandler(GameServer server, Socket clientSocket) {
         this.server = server;
@@ -28,6 +32,7 @@ public class ClientHandler implements Runnable{
         gameController.newGame(clientSocket.getInetAddress().toString());
         connected = true;
     }
+    
     @Override
     public void run() {
         try {
@@ -66,12 +71,12 @@ public class ClientHandler implements Runnable{
     }
     
     void sendMsg(String msg) {
-        StringJoiner joiner = new StringJoiner(Constants.MSG_DELIMETER);
+        StringJoiner joiner = new StringJoiner(GlobalConstants.MSG_DELIMETER);
         joiner.add(MsgType.SERVERMSG.toString());
         joiner.add(msg);
         String fullMessage=joiner.toString();
         int fullMessageLength=fullMessage.length();
-        StringJoiner headerJoiner = new StringJoiner(Constants.MSG_DELIMETER);
+        StringJoiner headerJoiner = new StringJoiner(GlobalConstants.MSG_DELIMETER);
         headerJoiner.add(new String(""+fullMessageLength));
         headerJoiner.add(fullMessage);
         toClient.println(headerJoiner.toString());
@@ -102,9 +107,9 @@ public class ClientHandler implements Runnable{
         }
         
         private void checkComplete(String receivedString) {
-        	String[] msgTokens = receivedString.split(Constants.MSG_DELIMETER);
-            int lengthHeader=Integer.parseInt(msgTokens[Constants.MSG_LENGTH_INDEX]);
-            int msgLength=receivedString.length()-msgTokens[Constants.MSG_LENGTH_INDEX].length()-Constants.MSG_DELIMETER.length();
+        	String[] msgTokens = receivedString.split(GlobalConstants.MSG_DELIMETER);
+            int lengthHeader=Integer.parseInt(msgTokens[GlobalConstants.MSG_LENGTH_INDEX]);
+            int msgLength=receivedString.length()-msgTokens[GlobalConstants.MSG_LENGTH_INDEX].length()-GlobalConstants.MSG_DELIMETER.length();
             if(lengthHeader!=msgLength) {
             	throw new MessageException("Received incomplete message: " + receivedString);
             }else {
@@ -114,10 +119,10 @@ public class ClientHandler implements Runnable{
         }
         private void parse(String strToParse) {
             try {
-                String[] msgTokens = strToParse.split(Constants.MSG_DELIMETER);
-                msgType = MsgType.valueOf(msgTokens[Constants.MSG_TYPE_INDEX].toUpperCase());
+                String[] msgTokens = strToParse.split(GlobalConstants.MSG_DELIMETER);
+                msgType = MsgType.valueOf(msgTokens[GlobalConstants.MSG_TYPE_INDEX].toUpperCase());
                 if (hasBody(msgTokens)) {
-                    msgBody = msgTokens[Constants.MSG_BODY_INDEX];
+                    msgBody = msgTokens[GlobalConstants.MSG_BODY_INDEX];
                 }
             } catch (Throwable throwable) {
                 throw new MessageException(throwable);

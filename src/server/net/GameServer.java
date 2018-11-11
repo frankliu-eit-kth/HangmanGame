@@ -6,12 +6,18 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
-
+/*
+ * @role: the gate of the server
+ * @functions:
+ * 		1. listen to the client connection request
+ * 		2. pass the accepted sockets to client handler
+ */
 public class GameServer {
+	
 	private static final int LINGER_TIME = 5000;
     private static final int TIMEOUT_HALF_HOUR = 1800000;
-    private final List<ClientHandler> clientHandlers = new ArrayList<>();
-    private int portNo = 8080;
+    private final List<ClientHandler> clientHandlers = new ArrayList<>();//to store the multiple threads
+    private int portNo = 8080;//default portNumer
     
     public static void main(String[] args) {
         GameServer server = new GameServer();
@@ -19,11 +25,7 @@ public class GameServer {
         server.serve();
     }
     
-    void removeHandler(ClientHandler handler) {
-        synchronized (clientHandlers) {
-            clientHandlers.remove(handler);
-        }
-    }
+
     private void serve() {
         try {
             ServerSocket listeningSocket = new ServerSocket(portNo);
@@ -35,6 +37,9 @@ public class GameServer {
             System.err.println("Server failure.");
         }
     }
+    /*
+     * @notice: used synchronized method to add handler to the list
+     */
     private void startHandler(Socket clientSocket) throws SocketException {
         clientSocket.setSoLinger(true, LINGER_TIME);
         clientSocket.setSoTimeout(TIMEOUT_HALF_HOUR);
@@ -45,6 +50,14 @@ public class GameServer {
         Thread handlerThread = new Thread(handler);
         handlerThread.setPriority(Thread.MAX_PRIORITY);
         handlerThread.start();
+    }
+    /*
+     * @role:executed when the client disconnects and the handler close the socket
+     */
+    void removeHandler(ClientHandler handler) {
+        synchronized (clientHandlers) {
+            clientHandlers.remove(handler);
+        }
     }
     
     private void parseArguments(String[] arguments) {
