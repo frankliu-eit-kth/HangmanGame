@@ -45,6 +45,7 @@ public class ClientHandler implements Runnable{
         while (connected) {
             try {
                 Message msg = new Message(fromClient.readLine());
+                System.out.println("test:received message:"+msg.getRcvdString());
                 switch (msg.msgType) {
                     case USER:
                         String newName = msg.msgBody;
@@ -71,6 +72,7 @@ public class ClientHandler implements Runnable{
     }
     
     void sendMsg(String msg) {
+    	
         StringJoiner joiner = new StringJoiner(GlobalConstants.MSG_DELIMETER);
         joiner.add(MsgType.SERVERMSG.toString());
         joiner.add(msg);
@@ -79,6 +81,7 @@ public class ClientHandler implements Runnable{
         StringJoiner headerJoiner = new StringJoiner(GlobalConstants.MSG_DELIMETER);
         headerJoiner.add(new String(""+fullMessageLength));
         headerJoiner.add(fullMessage);
+        System.out.println("test: sending string "+headerJoiner.toString());
         toClient.println(headerJoiner.toString());
     }
 
@@ -131,6 +134,10 @@ public class ClientHandler implements Runnable{
         
         private boolean hasBody(String[] msgTokens) {
             return msgTokens.length > 2;
+        }
+        
+        public String getRcvdString() {
+        	return this.receivedString;
         }
     }
     

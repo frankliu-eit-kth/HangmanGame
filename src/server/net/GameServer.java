@@ -33,6 +33,7 @@ public class GameServer {
                 Socket clientSocket = listeningSocket.accept();
                 startHandler(clientSocket);
             }
+            
         } catch (IOException e) {
             System.err.println("Server failure.");
         }
